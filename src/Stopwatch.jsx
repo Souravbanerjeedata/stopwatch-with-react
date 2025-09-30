@@ -2,23 +2,51 @@ import { useState, useEffect, useRef } from "react";
 
 export default function Stopwatch() {
   const [isRunning, setIsRunning] = useState(false);
-  const [ellapsedTime, setEllapsedTime] = useState(0);
+  const [elapsedTime, setElapsedTime] = useState(0);
   const intervalIdRef = useRef(null);
   const startTimeRef = useRef(0);
-  useEffect(() => {}, [isRunning]);
+
+  useEffect(() => {
+    if (isRunning) {
+      intervalIdRef.current = setInterval(() => {
+        setElapsedTime(Date.now() - startTimeRef.current);
+      }, 10);
+    }
+
+    return () => {
+      clearInterval(intervalIdRef.current);
+    };
+  }, [isRunning]);
 
   function start() {
-    
+    setIsRunning(true);
+    startTimeRef.current = Date.now() - elapsedTime;
   }
-  function stop() {}
-  function reset() {}
+
+  function stop() {
+    setIsRunning(false);
+  }
+
+  function reset() {
+    setElapsedTime(0);
+    setIsRunning(false);
+  }
+
   function formatTime() {
-    return <div>00:00:00</div>;
+    let minutes = Math.floor((elapsedTime / (1000 * 60)) % 60);
+    let seconds = Math.floor((elapsedTime / 1000) % 60);
+    let milliseconds = Math.floor((elapsedTime % 1000) / 10);
+
+    minutes = String(minutes).padStart(2, "0");
+    seconds = String(seconds).padStart(2, "0");
+    milliseconds = String(milliseconds).padStart(2, "0");
+
+    return `${minutes}:${seconds}:${milliseconds}`;
   }
 
   return (
     <body className="min-h-screen w-full bg-stone-200">
-      <div className="text-center my-22 mx-auto rounded-xl bg-white w-[450px] py-10 px-2 shadow-2xl">
+      <div className="text-center my-15 mx-auto rounded-xl bg-white w-[450px] py-10 px-2 shadow-2xl">
         <div className="font-bold text-shadow-lg text-[85px]">
           {formatTime()}
         </div>
